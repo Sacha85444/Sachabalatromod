@@ -1,0 +1,15 @@
+{
+	"id": "SACHAMOD",
+	"name": "Sachamod",
+	"display_name": "Sacha's mod",
+	"author": ["SACHA OF COURSE"],
+	"description": "Adds thingies i wanted to make.",
+	"prefix": "Sach",
+	"main_file": "main.lua",
+	"priority": 69,
+	"badge_colour": "709ba1",
+	"badge_text_colour": "00FFFF",
+	"version": "0.0.0.0.01a",
+	"dependencies": [],
+	"conflicts": []
+}
