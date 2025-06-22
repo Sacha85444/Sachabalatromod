@@ -632,7 +632,7 @@ SMODS.Joker {
 	config = { extra = { mult = 4, turnleft = 0, turnleftgain = 1} },
 	rarity = 3,
 	atlas = 'Sachamodz',
-	pos = { x = 0, y = 0 },
+	pos = { x = 3, y = 1 },
 	cost = 4,
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.mult, card.ability.extra.turnleft, card.ability.extra.turnleftgain} }
