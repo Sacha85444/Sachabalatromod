@@ -700,9 +700,9 @@ SMODS.Joker {
 		text = {
 			"{C:mult}+#1#{} Mult and",
 			"{X:mult,C:white}X#3#{} Mult",
-			"{C:inactive}(Gains {C:mult}+#2#{} Mult and",
+			"{C:inactive}(Gains {C:mult}+#2#{} {C:inactive}Mult and",
 			"{X:mult,C:white}X#4#{} {C:inactive}Mult when boss{} ",
-			"{C:inactive}blind is defeated){}"
+			"{C:inactive}blind is selected){}"
 		}
 	},
 	config = { extra = { mult = 4, mult_gains = 8, Xmult = 4, Xmult_gains = 1.5} },
@@ -724,12 +724,15 @@ SMODS.Joker {
 		end
 
 		if context.setting_blind and not context.blueprint then
-			card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_gains
-			card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gains
-			return {
-				message = "Jimbo",
-				colour = G.C.MULT
-			}
+			if G.GAME.blind:get_type() == 'Boss' then
+				card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_gains
+				card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gains
+				return {
+					message = "Jimbo",
+					colour = G.C.MULT
+				}
+			end
+			
 		end
 	end
 }
