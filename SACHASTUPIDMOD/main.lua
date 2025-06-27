@@ -36,6 +36,46 @@ SMODS.Seal {
 }
 
 SMODS.Atlas {
+    key = "jseal_atlas",
+    path = "Jimbo_seal.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Seal {
+    name = "jimboseal",
+    key = "Jseal",
+    badge_colour = HEX("605020"),
+	config = { mult = 4  },
+    loc_txt = {
+        -- Badge name (displayed on card description when seal is applied)
+        label = 'Jimbo Seal',
+        -- Tooltip description
+        name = 'Jimbo Seal',
+        text = {
+            'Does {C:mult}+#1#{} Mult',
+            "when scored"
+        }
+    },
+    loc_vars = function(self, info_queue)
+        return { vars = {self.config.mult} }
+    end,
+    atlas = "jseal_atlas",
+    pos = {x=0, y=0},
+
+    -- self - this seal prototype
+    -- card - card this seal is applied to
+    calculate = function(self, card, context)
+        -- main_scoring context is used whenever the card is scored
+        if context.main_scoring and context.cardarea == G.play then
+            return {
+                mult = self.config.mult
+            }
+        end
+    end,
+}
+
+SMODS.Atlas {
     key = "seal_atlas",
     path = "modded_seal.png",
     px = 71,
@@ -89,6 +129,49 @@ SMODS.Consumable {
     end
 }
 
+SMODS.Consumable {
+    set = "Tarot",
+    key = "jimbotarot",
+	config = {
+        -- How many cards can be selected.
+        max_highlighted = 1,
+        -- the key of the seal to change to
+        extra = 'Sach_Jseal',
+    },
+    loc_vars = function(self, info_queue, card)
+        --Handle creating a tooltip with seal args.
+        info_queue[#info_queue+1] = G.P_SEALS[(card.ability or self.config).extra]
+         --Description vars
+        return {vars = {(card.ability or self.config).max_highlighted}}
+    end,
+    loc_txt = {
+        name = 'Jimbo',
+        text = {
+            "Add a {C:mult}Jimbo Seal{} to ",
+            "{C:attention}#1#{} selected",
+			"card in your hand"
+        }
+    },
+    cost = 4,
+    atlas = "Tjimbo_atlas",
+    pos = {x=0, y=0},
+    use = function(self, card, area, copier)
+        for i = 1, math.min(#G.hand.highlighted, card.ability.max_highlighted) do
+            G.E_MANAGER:add_event(Event({func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true end }))
+            
+            G.E_MANAGER:add_event(Event({trigger = 'after',delay = 0.1,func = function()
+                G.hand.highlighted[i]:set_seal("Sach_Jseal", nil, true)
+                return true end }))
+            
+            delay(0.5)
+        end
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2,func = function() G.hand:unhighlight_all(); return true end }))
+    end
+}
+
 SMODS.Atlas {
     key = "Blust_atlas",
     path = "Bloodlust.png",
@@ -96,6 +179,12 @@ SMODS.Atlas {
     py = 95
 }
 
+SMODS.Atlas {
+    key = "Tjimbo_atlas",
+    path = "tarotjimbo.png",
+    px = 71,
+    py = 95
+}
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------DECKS-----------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +236,43 @@ SMODS.Back({
 	end
 })
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------BLINDS----------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SMODS.Atlas {
+    key = "sachblind",
+    path = "BlindChips.png",
+    px = 34,
+    py = 34,
+    frames = 1,
+    atlas_table = 'ANIMATION_ATLAS'
+}
+
+SMODS.Blind {
+    name = "boss_arachne",
+    key = "boss_arachne",
+    atlas = "sachblind",
+    mult = 2,
+    pos = { y = 0 },
+    dollars = 10,
+    loc_txt = {
+        name = 'Arachne',
+        text = {
+            'destroy discarded cards',
+        }
+    },
+    boss = {  min = 1 },
+    boss_colour = HEX('b83dba'),
+
+	calculate = function(self, blind, context)
+   	 	if context.discard and not G.GAME.blind.disabled then
+			for i, card in ipairs(G.hand.highlighted) do
+				return { remove = not card.ability.eternal }
+			end
+		end
+	end
+}
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------JOKERS----------------------------------------------------------------------------------------------
@@ -171,6 +297,7 @@ SMODS.Joker {
 	config = { extra = { mult = 40, odds = 3, chips = 150 } },
 	rarity = 2,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 0, y = 0 },
 	cost = 4,
 	loc_vars = function(self, info_queue, card)
@@ -226,6 +353,7 @@ SMODS.Joker {
 	rarity = 3,
 	-- Which atlas key to pull from.
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	-- This card's position on the atlas, starting at {x=0,y=0} for the very top left.
 	pos = { x = 1, y = 0 },
 	-- Cost of card in shop.
@@ -265,6 +393,7 @@ SMODS.Joker {
 	config = { extra = { chips = 0, chip_gain = 6, mult_gain = 1, mult = 0 } },
 	rarity = 1,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 2, y = 0 },
 	cost = 5,
 	loc_vars = function(self, info_queue, card)
@@ -330,6 +459,7 @@ SMODS.Joker {
 	config = { extra = { Xmult = 1, Xmult_gains = 0.1} },
 	rarity = 2,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 3, y = 0 },
 	cost = 7,
 	loc_vars = function(self, info_queue, card)
@@ -378,6 +508,8 @@ SMODS.Joker {
 	config = { extra = { Xmult = 1, chips_gains_spade = 10, Xmult_gains_stone = 0.2, chips = 0} },
 	rarity = 4,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
+
 	pos = { x = 0, y = 1 },
 	soul_pos = { x = 4, y = 1},
 	cost = 10,
@@ -425,6 +557,7 @@ SMODS.Joker {
 	config = { extra = {mult = 15} },
 	rarity = 1,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 4, y = 0 },
 	cost = 4,
 	loc_vars = function(self, info_queue, card)
@@ -455,9 +588,10 @@ SMODS.Joker {
 			"when shop is rerolled"
 		}
 	},
-	config = { extra = {odds = 6} },
+	config = { extra = {odds = 5} },
 	rarity = 1,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 5, y = 0 },
 	cost = 4,
 	loc_vars = function(self, info_queue, card)
@@ -574,7 +708,7 @@ SMODS.Joker{
 	end,
 
 	calculate = function(self, card, context)
-		if context.setting_blind then
+		if context.setting_blind and not context.blueprint then
 			local boss = 0
          	if G.GAME.blind:get_type() == 'Boss' then
 
@@ -708,6 +842,7 @@ SMODS.Joker {
 	config = { extra = { mult = 4, mult_gains = 8, Xmult = 4, Xmult_gains = 1.5} },
 	rarity = 4,
 	atlas = 'Sachamodz',
+	blueprint_compat = true,
 	pos = { x = 0, y = 2 },
 	soul_pos = { x = 5, y = 1},
 	cost = 20,
@@ -737,7 +872,83 @@ SMODS.Joker {
 	end
 }
 
+SMODS.Joker {
+	key = 'smallb',
+	loc_txt = {
+		name = 'Small Blue',
+		text = {
+			"When a {C:attention}Bonus Card{} is",
+			"scored, gain {C:attention}#2#${} and",
+			"scales {C:chips}+#3# Chips",
+			"{C:inactive}(Currently{} {C:chips}+#1#{} {C:inactive}Chips.){}"
+		}
+	},
+	config = { extra = {chips = 20, dollars = 2, chips_gains = 10} },
+	rarity = 2,
+	atlas = 'Sachamodz',
+	blueprint_compat = true,
+	pos = { x = 1, y = 2 },
+	cost = 5,
+	loc_vars = function(self, info_queue, card)
+		return { vars = {card.ability.extra.chips, card.ability.extra.dollars, card.ability.extra.chips_gains} }
+	end,
+	calculate = function(self, card, context)
 
+		if context.joker_main then
+			return {
+				chips = card.ability.extra.chips
+			}
+		end
+
+		if context.individual and context.cardarea == G.play then
+
+			if context.other_card.ability.effect == 'Bonus Card' then
+
+				card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gains
+				ease_dollars(card.ability.extra.dollars)
+				return {
+					message = "Blue power",
+					colour = G.C.CHIPS
+				}
+			end
+		end
+	end
+}
+
+SMODS.Joker {
+	key = 'Bcard',
+	loc_txt = {
+		name = 'Blank card',
+		text = {
+			"Gives {C:mult}+#1#{} Mult and",
+			"{C:chips}+#2#{} Chips when a",
+			"{C:attention}Wild Card{} is scored.",
+		}
+	},
+	config = { extra = {mult = 10, chips = 20} },
+	rarity = 1,
+	atlas = 'Sachamodz',
+	blueprint_compat = true,
+	pos = { x = 2, y = 2 },
+	cost = 3,
+	loc_vars = function(self, info_queue, card)
+		return { vars = {card.ability.extra.mult, card.ability.extra.chips} }
+	end,
+	calculate = function(self, card, context)
+		if context.individual and context.cardarea == G.play then
+
+			if context.other_card.ability.effect == 'Wild Card' then
+
+				return {
+
+						mult = card.ability.extra.mult,
+						chips = card.ability.extra.chips,
+						card = context.other_card
+				}
+			end
+		end
+	end
+}
 --[[else
 	return {
 
